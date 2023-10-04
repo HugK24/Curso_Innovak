@@ -1,0 +1,54 @@
+---
+title: "Intento 2"
+output: html_document
+output: pdf_document
+date: "2023-10-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+
+#Generar una tabla con diferentes atributos
+
+
+nombres <- c("Celina", "Hugo", "Larissa", "Daniel", "Mariana")
+
+tiempo_empresa <- c (5, 2, 5, 0.5, 0.1)
+
+laboratorio <- c("Agronomia", "Biologia_molecular", "Bioprocesos", "Agronomia", "Bioprocesos")
+
+edad <- c(28, 40, 28, 27, 22)
+
+sexo <- c("F", "M","F", "M","F")
+
+intento_tabla <- data.frame (nombres, tiempo_empresa, laboratorio, edad, sexo)
+
+df <- data.frame (nombres = c("Celina", "Hugo", "Larissa", "Daniel", "Mariana"), tiempo_empresa = c(5, 2, 5, 0.5, 0.1), laboratorio = c("Agronomia", "Biologia_molecular", "Bioprocesos", "Agronomia", "Bioprocesos"), edad = c(28, 40, 28, 27, 22), sexo = c("F", "M","F", "M","F"))
+
+intento_tabla
+```
+
