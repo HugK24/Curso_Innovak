@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Introduccion
+
+##funciones
+
+#Set de argumentos que se organizan juntos para realizar una tarea especifica
+
+#En realidad todos los comandos que hemos usados son las funciones que ya vienen incluidas en R pero RStudio tam bien nos da la posibilidad de crear funciones 
+
+##Componentes de las fucniones
+
+*_Nombre de la funcion_
+*_Argumentos:_los elementos necesarios para llevar a cabo la funcion. _input_
+*_cuerpo de la funcion 
+*_respuesta
+
+```{r}
+nombre_funcion <- function(argumentos){ #lo que necesitas para calcular la funcion
+respuesta <- haz_algo(argumentos) #calculos o modificaciones qye haras con los argumentos
+return (respuesta) #lo que se va a imprimir} 3todo lo que esta dentro de corchetes e sla funcion
+
+calc_vol_foliar<- function(longit, ancho, altura) {
+  area <- longit*ancho
+  volumen <- area*altura
+  return (volumen)
+}
+
+#Usemos la funcion
+calc_vol_foliar(longit = 1, ancho = 2.5, altura = 2)
+
+#guardar objeto
+arbusto1 <- calc_vol_foliar(2.5, 1, 2)
+
+nombres <- c("arbusto1", "arbusto2", "arbusto3")
+
+ancho<- c (5, 2, 4.4)
+
+longit<- c(10, 9.2, 10.9)
+
+altura<- c(15, 12.3, 16)    
+  
+  
+
+intento_tabla <- data.frame (nombres, ancho, longit, altura)
+
+arbustos <- data.frame (nombres = c("arbusto1", "arbusto2", "arbusto3"), ancho=c (5, 2, 4.4), longit= c(10, 9.2, 10.9), altura= c(15, 12.3, 16))
+                  
+#Ahora usemos un set de datos des un data frame
+calc_vol_foliar(arbustos$longit[1],
+                arbustos$ancho[1],
+                arbustos$altura[1])
+
+#En estos brackets no hay coma,la funcion toma de la tabla arbustos el valor de longitud y los demas parametros
+
+```
+
+##Ejercicio
+ 
+Calcular el area de la hojas de una planta unica en el mundo con esas caracteristicas A=Bh/2

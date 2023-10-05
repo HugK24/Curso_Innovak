@@ -136,9 +136,98 @@ intento_tabla <- data.frame (nombres, tiempo_empresa)
 df <- data.frame (nombres = c("Celina", "Hugo", "Larissa", "Daniel", "Mariana"), tiempo_empresa = c(5, 2, 5, 0.5, 0.1))
 
 intento_tabla
-                  
-                  
+
+remove(var)
 
 ```
+
+```{r}
+## Subiendo una tabla de Excel 
+
+# Usando R base 
+
+Dat_clase <- read.csv("~/Rstudio/Materiales/Class-data.csv")
+
  
+```
+
+#Como transformar una matriz a una data frame y viceversa
+```{r}
+
+
+Acidos <- read.csv("~/Rstudio/Materiales/Acidos_ex.csv")
+
+#Para hacer una matriz 
+Acidos <- as.matrix(Acidos)
+
+Acidos <- Acidos[,-1]
+
+rowname(Acidos) <- Acidos[,1] #Tabla [filas, columnas]
+
+Acidos <- Acidos[,-1]
+
+#De vuelta a dataframe
+Acidos <- as.data.frame(Acidos)
+
+#Para elegir columnas en especifico
+Acidos$NPLP
+
+```
+
+###Listas y otros objetos raros
+
+#Las listas de Rstudio son una colaboracion de otros objetos en R. Rara vez van a crear una desde cero pero es importante reconocerlas cuando cuando alguna formula da como resultado iuna lista. De esta manera se puede extrar objetos especificos de una lista en RStudio para algun analisis en especifico
  
+##Creando uan lista 
+```{r}
+
+lista_ejemplo <- list(c("Jan", "Feb", "Mar"),
+                  matrix(c(3,9,5,1,-2,8), nrow = 2),     list("green",12.3))
+
+#Nombres de los elementos en la lista 
+
+names(lista_ejemplo) <-c("Meses", "Matriz", "Lista interna")
+
+#Ver la lista
+print(lista_ejemplo)
+
+#Extrer objetos de la lista
+matriz_lista <-lista_ejemplo$Matriz
+
+
+```
+
+##Paquetes
+
+#Son extensiones que al programa base de Rstudio. Contienen codigo, datos y documentacion que puedan ayudad a su entendimiento
+
+#Como instalar un paquete:
+
+#manera facil: desde la consola ->
+#manera dificil: con codigo
+
+```{r}
+install.packages("tidyverse")
+
+library(tidyverse)
+
+```
+
+```{r}
+
+Acidos <- tidyverse:: read.csv("Materiales/Acidos_ex.csv")
+Acidos <- read.csv("~/Rstudio/Materiales/Acidos_ex.csv") #usar este de preferencia
+
+??tidyverse
+
+?matrix
+
+```
+
+```{r}
+
+install.packages("car") #la instalacion solo es una vez
+library(car) #la carga solo es una vez
+?Anova
+```
+
