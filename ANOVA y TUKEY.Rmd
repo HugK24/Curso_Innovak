@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+#ANOVA
+
+#Introduccion 
+A un nivel mayor de complejidad que las pruebas de t el ANOVA (Analysis of Variance) es una fórmula estadística que se utiliza para comparar varianzas entre las medias de diferentes (__mas de dos__) grupos. 
+
+Existe el ANOVA de una via en la que solo se tiene una variable independiente (con varios grupos) y se quiere ver la diferencia entre dichos grupos sobre una variable dependiente.
+
+El ANOVA de 2 vias anade otra variable independiente por lo que mide el efecto de dos variables independientes sobre una variable dependiente. Tambien existe la ANOVA de tres vias pero la complejidad en comparaciones y tratamientos crece bastante.
+
+```{r}
+#Library
+
+library(dplyr)
+library(tidyr)
+library(car)
+
+#R correo ANOVA de dos maneras diferentes
+
+
+Rodillas <- read.csv("~/Rstudio/Materiales/Rodillas.csv")
+
+summary(aov(shift~treatment, data = Rodillas))
+
+anova(lm(shift~treatment, data = Rodillas))#lm modelo lineal. Este recomendado 100%
+```
+La diferencia entre lm y aov es el tipo de modelo y mas que nada la presentación de los datos. Si quieren saber mas al respecto pueden leer aquí:
+
+(lm vs. aov)[ https://www.oreilly.com/library/view/the-r-book/9780470510247/ch011-sec015.html]
+
+Sin embargo para fines utiles yo siempre uso aov() ya que por definición significa análisis de varianza
+
+# ANOVA con el paquete car 
+
+Este paquete esta enfocado a varios tipos de analisis estadisticos y su funcion de ANOVA tiene un argumento para lidiar con datos desbalanceados (Tipo II y III). Ademas que este paquete tambien cuenta con la funcion levene para checar igualdad de varianzas.
+
+[Tipos de ANOVA](https://www.r-bloggers.com/2011/03/anova-%E2%80%93-type-iiiiii-ss-explained/)
+
+```{r}
+
+leveneTest(shift~treatment, data = Rodillas)#mayor a 0.05 homogeneidad de varianzas
+
+plot(rod_anova,1) #interpretacion: los residuals tienes qye estar distribuidos de manera aleatoria y tienen vairnza constante 
+
+##ANOVa
+rod_anova <- aov(shift~treatment, data = Rodillas) #se puede usar lm o aov
+
+Anova(rod_anova)
+
+Anova(rod_anova, type = 2)
+Anova(rod_anova, type = 3)
+
+```
+#Tukey 
+En el caso de que una ANOVA nos muestre que existen diferecnias significativas, ek paso siguiente es correr un test de Tuckey HSD en el cual desglosa un ANOVA y nos dice cuales de los tratamientos son diferentes 
+
+```{r}
+
+TukeyHSD(rod_anova)
+TukeyHSD(aov(shift~treatment, data =Rodillas))
+```
+
