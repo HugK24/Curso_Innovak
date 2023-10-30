@@ -1,0 +1,162 @@
+---
+title: "Análisis no parametricos"
+output: html_document
+date: "2023-10-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Introducción 
+
+Como vimos antes nuestro datos no van a poder ser analizados siempre por analisis para metricos ya sea porque no se pueden nomalizar o porque la naturaleza de los datos no lo permite. Para ello vamos a aprender varios test no parametricos. Recuerden que siempre es mejor tratar de hacer todo lo posible para usar un test parametrico antes de recurir a estos test ya que son mas restrictivos y no tan sensib,es como los test parametricos 
+
+```{r}
+
+#Libraries 
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(car)
+library(PMCMRplus)
+library(rstatix)
+
+```
+# Krustal Wallis 
+
+Este metodo se usa como sustituto a la _ANOVA_ de una via ya que no se nocesita normalidad de distribucion en la poblacion ni homogeneidad de varianza 
+
+```{r}
+
+Estanques <- read.csv("~/Rstudio/Materiales/BRW.ponds.csv")
+# Primero hay que revisar normalidad 
+shapiro.test(Estanques$DOC)
+hist(Estanques$DOC)
+qqnorm(Estanques$DOC)
+
+Estanques %>%
+  group_by(Region) %>%
+   summarise(n())
+
+leveneTest(log(DOC+1)~Region, data = Estanques) 
+
+#Krustal wallis
+
+kruskal.test(DOC ~ Region, data = estanques)
+
+Estanque_anova <- aov(log(DOC+1)~Region, data = Estanques)
+
+Anova(Estanque_anova)
+TukeyHSD(Estanque_anova)
+```
+## Wilcoxon Rank 
+
+Como los ANOVA KW nos dice si hay o no diferencias pero no cuales son esas diferencias. Para ello usamos el equivalente no parametrico al test de _Tukey HSD_. El pairise Wilcoson test es un post hoc test que se puede usar como sustitucion de Tukey 
+
+
+```{r}
+
+pairwise.wilcox.test(Estanques$DOC,
+                     Estanques$Region,
+                     p.adjust.method = "none")
+
+#Compara con Tukey
+TukeyHSD(est_anova)
+```
+Que es el p-adjust method?
+Ajusta los p-values cuando existen multiples comparaciones susando metodos diferentes. Existen varios metodos y aunque su explicacion matematica es algo complicada es imporatante que conozcan su aplicacion. La funcion principal de estos metodos es ajustar p-value tomando en cuenta las comparaciones para evitar que se inflen demasiado y evitar falsos positivos. El mertodo mas comun y tambien ms estricto es _bonferroni_ o false discovery rate otro menos etricto es _fdr_
+
+```{r}
+
+
+pairwise.wilcox.test(Estanques$DOC,
+                     Estanques$Region,
+                     p.adjust.method = "none")
+
+pairwise.wilcox.test(Estanques$DOC,
+                     Estanques$Region,
+                     p.adjust.method = "bonferroni")
+
+pairwise.wilcox.test(Estanques$DOC,
+                     Estanques$Region,
+                     p.adjust.method = "fdr")
+```
+```{r}
+library(dunn.test)
+dunn.test::dunn.test(Estanques$DOC,
+                     Estanques$Region,
+                     method = "bonferroni")
+```
+```{r}
+Exu<-read.csv("~/Rstudio/Materiales/Exudados.csv")
+
+shapiro.test(Exu$Valarate_C18P)
+hist(Exu$Valarate_C18P)
+qqnorm(Exu$Valarate_C18P)
+
+shapiro.test(Exu$Chorismate_C18N)
+hist(Exu$Chorismate_C18N)
+qqnorm(Exu$Chorismate_C18N)
+
+shapiro.test(Exu$Glyoxalate_HILN)
+hist(Exu$Glyoxalate_HILN)
+qqnorm(Exu$Glyoxalate_HILN)
+
+pairwise.wilcox.test(Exu$Glyoxalate_HILN,
+                     Exu$Treatment,
+                     p.adjust.method = "none")
+
+pairwise.wilcox.test(Exu$Glyoxalate_HILN,
+                     Exu$Treatment,
+                     p.adjust.method = "fdr")
+
+
+
+```
+
+# Friefman test Como pueden ver en el caso de los exudados el test de Krustal Wallis no nos permite comparar interacciones entre dos variables independientes como con una ANOVA de dos vias. En este caso el equivalente no parametrico es el test de Friedman. Sin embrago, este test es sumamente restrictivo en los ser de datos que pueden ser analizdos con el y a veces es mejor usar Krustal Wallis por separado en cada variable independiente 
+
+```{r}
+library(PMCMRplus)
+data("selfesteem", package = "datarium")
+head(selfesteem, 3)
+
+#Los datos tiene que estar balanceados 
+selfesteem <- selfesteem %>%
+  gather(key = "time", value = "score", t1, t2, t3) %>%
+  convert_as_factor(id, time)
+head(selfesteem, 3)
+
+friedman.test(score ~ time|id, data = selfesteem)
+
+#Post hoc test equivalente 
+frdAllPairsNemenyiTest(score ~ time |id, data = selfesteem)
+
+#Ejercicio final 
+
+Datos <- read.csv("~/Rstudio/Materiales/Set de datos proyecto.csv")
+
+shapiro.test(Datos$Long_Raiz)
+hist(Datos$Long_Raiz)
+
+shapiro.test(Datos$Cant_sem_germi)
+
+shapiro.test(Datos$Peso_sem_gr)
+hist(Datos$Peso_sem_gr)
+
+#Tranformando
+shapiro.test(log(Datos$Long_Raiz))
+
+shapiro.test(log(Datos$Peso_sem_gr))
+
+#Krukal Wallis
+
+kruskal.test(Long_Raiz ~ Dia, data = Datos)
+
+kruskal.test(Long_Raiz ~ Tratamiento, data = Datos)
+
+
+
+```
+
