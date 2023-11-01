@@ -1,0 +1,297 @@
+---
+title: "ggplot2"
+author: "Hugo Barrera Chavez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(patchwork)
+library(tidyverse)
+
+```
+# Graficos 
+Aqui aprenderemos a generar leyendas y graficar boxplots
+
+```{r}
+# Data 
+
+comp_soils <- read.csv("~/Rstudio/Materiales/Soil_Comparison.csv")
+
+# Boxplots
+data(CO2)
+
+# Puntos 
+data (iris)
+FlujosC <- read.csv("~/Rstudio/Materiales/flujos.csv")
+
+```
+
+# Boxplots
+Los boxplots son de los graficos mas utilizados para condensar un gran numero de informacion combinando una variable discreta (x) y una variable continua (y)
+
+
+```{r}
+theme_set(theme_bw())
+
+ggplot(CO2, aes(x = Type, y = uptake)) +
+  geom_boxplot(fill = "red",
+               color = "green") # A partir de las variedades
+
+#Si bien esta grafica compara los dos tipos de planta que tenemos, podemos comparar tambien los tratamientos usando boxplots con diferentes colores. 
+
+```
+```{r}
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() # A partir de tratamientos
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Type)) +
+  geom_boxplot()
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Plant)) +
+  geom_boxplot()
+
+# Al agregar esta otra variable el boxplot automaticamente detecta que tenemos dos variables independientes las cuales se deben de utilizar separando grupos. ggplot tiene colores automáticos
+
+## Leyendas 
+# Pero ahora si, veamos como modificar las leyendas
+
+```
+## Leyendas 
+Pero ahora si, veamos como modificar las leyendas
+
+```{r}
+# Si la leyenda nos estorba 
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  theme(legend.position = "none") # Para quitar la leyenda
+
+# si queremos que no tenga titulo la leyenda
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  theme(legend.title = element_blank()) # significa vacio
+
+# Otra opcion u otra forma 
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  scale_fill_discrete(name = NULL) # no le estoy poniendo nombre
+
+
+```
+Si bien las leyendas del van del lado derecho de nuestro grafico, podemos cambiarla de lugar
+
+```{r}
+```{r}
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  theme(legend.position = "top") # Poner la leyenda arriba 
+
+```
+Y como nuestras otras variables tambien podemos modificar el formato del texto
+
+```{r}
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  theme(legend.position = "top") # Poner la leyenda arriba 
+
+```
+Y como nuestras otras variables tambien podemos modificar el formato del texto
+
+```{r}
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  theme(legend.title = element_text(color = "chocolate",
+        size = 10,
+        face = "bold"))+
+
+  ggtitle("Dioxido de Carbono") # Titulo
+
+# Cambiar el orden de los datos 
+
+CO2$Treatment <- factor(CO2$Treatment,
+                        levels = c("chilled", "nonchilled"),
+                        ordered = TRUE) # Aqui ordenamos la tabla para que aparezca primero chilled y luego nonchilled
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() # Aqui la grafica ya presento primero el tratamiento chilled en la leyenda
+
+# Cambiar el nombre de los datos 
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  scale_fill_discrete(name = "Tratamientos",
+                      labels = c("Frio", "Temperado")) + 
+  xlab("Tipo de Planta") + ylab(bquote("Absorción de CO"[2]))
+
+
+```
+Mas opciones para cambiar las leyendas...
+[Tutorial de modificaciones de leyendas y elementos de un grafico](https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#legends)
+
+### Ejercicio
+
+Usando los datos de Comp_soils quiero que grafiquen un boxplot de una variable diferente cada quien en el que comparen tipo de suelo por temperatura. Ademas deben de modificar por lo menos una vez los siguiente elementos:
+
+1. Modificacion a la leyenda (que no sea quitarla!)
+2. Etiquetas de los ejes
+3. Modificacion de la escala de los ejes
+4. Un titulo con por lo menos una modificacion en formato
+
+
+
+```{r}
+ggplot(comp_soils, aes(x = Temperature, y = NH3.ugL, fill = Soil)) +
+  geom_boxplot()
+
+ggplot(comp_soils, aes(x = Temperature, y = NH3.ugL, fill = Soil)) +
+  geom_boxplot() + 
+  scale_fill_discrete(name = "Tipo de suelo",
+                      labels = c("Capa activa", "Permafrost")) + 
+  xlab("Temperatura") + ylab(bquote("Contenido de NH"[3](ug/L))) + 
+  ylim(c(0,2000)) + 
+  ggtitle("Contenido de NH3") + 
+  theme(plot.title = element_text(face = "italic", hjust = .5, size = 10))
+
+```
+# Modificando colores en boxplots
+
+aqui el orden si importa, entonces hay que hacer lo siguiente:
+
+```{r}
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot() + 
+  scale_fill_manual(name = "Treatment",
+                    values = c("green", "red")) # Tiene que ser cada color para cada variable, el fill arriba debe de mantenerse en el fill de scale_fill_manual
+
+# Diferencia entre fill y color
+
+ggplot(CO2, aes(x = Type, y = uptake, color = Treatment)) +
+  geom_boxplot() + 
+  scale_color_manual(name = "Treatment",
+                    values = c("green", "red")) # El color arriba debe de ser igual abajo en scale_color_manual.
+
+# Cambiando o combinando uno y otro 
+
+ggplot(CO2, aes(x = Type, y = uptake, fill = Treatment)) +
+  geom_boxplot(col = "yellow") + # Lo cambia en amba 
+  scale_fill_manual(name = "Treatment",
+                    values = c("green", "red"))
+
+# Cambiar ambos por variables 
+
+ggplot(CO2, aes(x = Type, y = uptake, col = Treatment, fill = Treatment)) +
+  geom_boxplot() + 
+  scale_color_manual(name = "Treatment",
+                    values = c("purple", "red"))+
+  scale_fill_manual(name = "Treatment",
+                    values = c("yellow", "blue"))
+
+```
+
+
+```{r}
+data(CO2)
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot()+
+  scale_fill_manual(name=  "Treatment",
+                    values = c("darkgreen", "purple"))
+
+# Diferencia entre fill y color 
+ggplot (CO2, aes(x= Type, y = uptake, color = Treatment))+
+  geom_boxplot(fill = "black")+  #lo cambia en ambos
+  scale_fill_manual(name=  "Treatment",
+                    values = c("darkgreen", "purple"))+
+  
+# Solo graficando una vez 
+  ggplot (CO2, aes(x= Type, y = uptake, color = Treatment))+
+  geom_boxplot(fill = "black")+  #lo cambia en ambos
+  scale_fill_manual(name=  "Treatment",
+                    values = c("darkgreen", "purple"))
+
+# Si queremos cambiar ambos por variables?
+
+ggplot (CO2, aes(x= Type, y = uptake, col= Treatment, fill = Treatment))+
+  geom_boxplot()+  #lo cambia en ambos
+  scale_color_manual(name=  "Treatment",
+                    values = c("darkgreen", "purple"))+
+  scale_fill_manual(name = "Treatment",
+                    values = c("darkgreen", "purple"))
+                    
+
+```
+
+## Otras cosas que se pueden modificar
+*outlier.colour, outlier.shape, outlier.size
+*noch
+*lwd, alpha(transparencia)
+*puntos de media 
+*boxdots
+
+```{r}
+#outliers
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot(outlier.color = "red", outlier.shape = 9,
+               outlier.size= 3)+
+  scale_fill_manual(name ="Treatment",
+                     values = c("blue", "darkgreen"))
+
+#notch
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot(notch = TRUE, notchwidth = 0.3)+
+  scale_fill_manual(name ="Treatment",
+                     values = c("blue", "darkgreen"))
+
+# lwd, alpha. Transparencia 
+
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot(lwd = 1.0, alpha = 0.5)+
+  scale_fill_manual(name ="Treatment",
+                     values = c("blue", "darkgreen"))
+
+#mean dots. Resumen de estadistica 
+
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot(alpha=0.4)+
+  scale_fill_manual(name ="Treatment",
+                     values = c("blue", "darkgreen"))+
+  stat_summary(fun.y = mean, geom = "point", shape=11, size=4,
+               position=position_dodge(0.6))
+
+# boxdots
+
+ggplot (CO2, aes(x= Type, y = uptake, fill= Treatment))+
+  geom_boxplot(alpha=0.4)+
+  scale_fill_manual(name ="Treatment",
+                     values = c("blue", "darkgreen"))+
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = 1,
+               position = position_dodge(1))
+
+```
+```{r}
+Suelos <- read.csv("~/Rstudio/Materiales/Soil_Comparison.csv")
+
+ggplot (Suelos, aes(x= Soil, y = WaterRedox, fill= Temperature))+
+  geom_boxplot(outlier.color = "red", outlier.shape = 9,
+               outlier.size= 3, alpha=0.4, lwd= 0.9 )+
+  labs(title = "Composicion de suelos",
+       x = "Tipo de suelo",
+       y = "Water Redox")+
+  ylim(260,375)+
+   scale_fill_manual(name=  "Tipo de suelo",
+                    values = c("darkorange", "purple"))+
+    stat_summary(fun.y = mean, geom = "point", shape=5, size=4,
+               position=position_dodge(0.6))
+
+
+
+
+
+```
+
