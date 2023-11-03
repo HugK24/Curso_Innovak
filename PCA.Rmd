@@ -1,0 +1,61 @@
+---
+title: "Graficos de analisis de componentes principales"
+output: html_notebook
+---
+
+
+#PCA
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggbreak)
+library(wesanderson)
+library(ggforce)
+# Data
+Exudados <- read.csv("~/Rstudio/Materiales/Exudates_PCA.csv")
+
+# Ejercicio
+Metab <- read.csv("~/Rstudio/Materiales/Grupos_metabolicos.csv")
+
+
+```
+
+# Calcular PCA
+```{r}
+PCAscores <- PCAc[["x"]]
+View(PCAscores)
+
+PCAscores <- as.data.frame(PCAscores)%>%
+  add_column(Plant_type = Exudados$Plant_type)%>%
+  add_column(Treatment = Exudados$Treatment)
+
+PCAc <- prcomp(Exudados[,4:42], center=TRUE,
+               scale= TRUE)
+summary(PCAc)
+```
+
+
+#El grafico 
+
+```{r}
+Exu_elipse <- ggplot(data = PCAscores,
+                     aes(x = PC1, y=PC2, color=Treatment, 
+                         shape = Plant_type))+
+  geom_point(size=3)+
+  theme_bw()+
+  scale_color_manual(values= wes_palette("BottleRocket2", n="4"),
+                     name="Treatment")
+Exu_elipse <- Exu_elipse +
+  geom_mark_ellipse(aes(fill = Treatment,
+                       color = Treatment))+
+  scale_fill_manual(values = wes_palette("BottleRocket2", n=4),
+                    name="Treatment")
+Exu_elipse <- Exu_elipse +
+  labs(x = "PC 1 (65.36%)",
+       y = "PC 2 (15.06%)",
+       shape ="Plant Type")
+       
+```
+
