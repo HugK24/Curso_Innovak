@@ -1,0 +1,165 @@
+---
+title: "Analisis de composicion taxonomica"
+output: html_notebook
+---
+
+
+# Introduccion 
+
+# Introduccion
+
+Hasta este momento hemos estado contando CUANTO hay dentro de nuestras muestras pero lo verdaderamente util es saber QUE hay dentro de las muestras. Esto es a lo que se le llama _analisis taxonomico._
+
+__Porque es importante?__
+
+Como les comentaba las comunidades microbianas en suelos son muy dinamicas y muchas veces (como con mis datos) no ves cambios en las cantidades totales de microorganismos. Sin embargo, al ver la taxonomia las abundancias relativas de algunos grupos pueden ser modificados ya sea aumentado o disminuido. 
+
+De esta manera se espera que cualquier producto o tratamiento que apliquemos al suelo, no tenga un efecto detrimental en grupos taxonomicos que son buenos para la planta. Dado que todas estos hongos y microbios interactuan constantemente en este microecosistema estos cambios en abundancia pueden darnos pista de como interactuan.
+
+
+```{r}
+library(phyloseq)
+library(tidyverse)
+library(dplyr)
+library(RColorBrewer)
+library(microbiome)
+library(ggsignif)
+library(scales)
+library(car)
+library(wesanderson)
+library(pheatmap) #para hacer heatmaps
+
+#Data 
+
+load("ITS_filt.RData")
+load("Vid_ejemplos.RData")
+
+
+
+
+```
+
+Esta analisis realmente no tiene un proceso en especifico y en realidad es exploratorio.Para ello neceditamos realizar nuestras datos, es decir, hacer muchos graficos y de hao se elige a cuales grupos vale la ena hacer analisis taxonomico.
+
+# 1. Visualizar a nivel phylum
+
+## Heatmap
+
+```{r}
+Phyla_fun <- tax_glom(vid_bio, taxrank= "Phylum", NArm=FALSE)
+
+## Extraer datos del objeto phyloseq
+
+OTU_matrix <- as.data.frame (Phyla_fun@otu_table)
+
+Tax_matrix <- as.data.frame (Phyla_fun@tax_table)
+
+
+## Renombramos las columnas de nuestras abundancias en el phylum de la tabla taxa
+
+colnames(OTU_matrix) <- Tax_matrix$Phylum
+
+# Quitar phylums desconocidos 
+OTU_matrix <- OTU_matrix[, -c(10,21)]
+
+Phyla_matrix <- as.matrix(t(OTU_matrix))
+
+```
+
+## Procesamiento de datos 
+
+Este proceso siempre sera especifico a sus datos. Usualmente los heatmaps siempre van de mayor a menos asi que este paso siempre lo haran pero el resto fue ordenar muestras y renonmbrar variables 
+
+```{r}
+Phyla_matrix <- Phyla_matrix [order(Phyla_matrix[,1],
+                              decreasing = TRUE),] #ordenar de mayo a menor
+
+sorder <- c("S81", "S85", "S82", "S83") 
+#cambiar orden de columnas 
+Phyla_matrix <- Phyla_matrix[,sorder]
+
+row.names(Phyla_matrix)[16] <- "SAR324 Clade" # PAra cambiar el nombre de una fila en especifico 
+```
+
+## Usando el paquete heatmap
+
+Este paquete es que tiene la major flexibilidad al momento de hacer heatmaps. RStudio ofrece muchos otrso pero ggplot2 no tiene una funcion predeterinada facil para hacer heatmaps
+
+```{r}
+pheatmap(Phyla_matrix) # el objeto siempre debe estr en formato de matriz y los valores como numericos 
+```
+### _Notan algo en el orden de nuestras filas y columnas? Clusters_
+La funcion default de pheatmap es que automaticamente te reacomoda (cluster) tus filas y columnas de acuerdo a como cree que estan mas relacionadas las variables; es decir las agrupa. Esta funcion suele ser util cuando haces heatmaps de genes ya que te permite ver como se activan o apagan en conjunto y si hay "clusters" de genes relacionados. Pero en nuestro caso arruino todo el pre-procesamiento previo que nosotros le dimos por lo que tenemos que quitarle ese default.
+
+```{r}
+pheatmap(Phyla_matrix, 
+         cluster_rows = FALSE, cluster_cols=FALSE) #Quitar cluster 
+```
+## El siguiente problema? La escala 
+
+```{r}
+pheatmap(Phyla_matrix, 
+         cluster_rows = FALSE, cluster_cols=FALSE,
+         scale = "column") # Casi no se usa 
+
+pheatmap(Phyla_matrix, 
+         cluster_rows = FALSE, cluster_cols=FALSE,
+         scale = "row")
+```
+# Como modificar la escala manuealmente?
+
+```{r}
+# Funcion para separar datos en secciones 
+
+quantile_breaks <- function (xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}  # esta funcion nunca se cambia 
+
+mat_breaks <- quantile_breaks(Phyla_matrix, 
+                              n= 15)
+
+pheatmap(Phyla_matrix,
+         cluster_row=FALSE, cluster_cols = FALSE,
+         scale = "none",
+         breaks = mat_breaks)
+
+```
+# Mejorando los colores del heatmap 
+
+```{r}
+pheatmap(Phyla_matrix,
+         cluster_row=FALSE, cluster_cols = FALSE,
+         scale = "none",
+         breaks = mat_breaks,
+         color = colorRampPalette(c("bisque", "dodgerblue", "blue3", "darkslateblue"))
+         (13))
+```
+
+```{r}
+quantile_breaks <- function (xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+  mat_breaks <- quantile_breaks(Phyla_matrix, 
+                              n= 35)
+pheatmap(Phyla_matrix,
+         cluster_row=FALSE, cluster_cols = FALSE,
+         scale = "none",
+         breaks = mat_breaks,
+         color = colorRampPalette(c("snow2","lightskyblue1","plum3","magenta4","steelblue4","black"))
+         (28))
+
+```
+
+```{r}
+pheatmap(Phyla_matrix,
+         cluster_row=FALSE, cluster_cols = FALSE,
+         scale = "none",
+         color = colorRampPalette(c("snow2","lightskyblue1","plum3","magenta4","steelblue4","black"))(28),
+breaks = mat_breaks,
+fontsize = 6,
+gaps_col = c(2),
+labels_col = c ("Balox Salino", "Balox No salino", "Balox Control", "Balox Control"))
+```
+
